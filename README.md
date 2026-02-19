@@ -159,69 +159,189 @@ Pick any (or none):
 
 ---
 
-## How to Run (example)
-> Replace the commands below with what matches your project structure.
+## How to Run (Updated)
 
-### Create and activate virtual environment
+### Prerequisites
+- Python 3.10 or higher
+- pip (Python package manager)
+
+### 1. Create and activate virtual environment
+
+**Windows:**
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# .venv\Scripts\activate   # Windows
+.venv\Scripts\activate
 ```
 
-### Install dependencies
+**Linux/macOS:**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the API (FastAPI example)
+### 3. Run the Application
+
+#### Start the FastAPI server:
 ```bash
-uvicorn app.main:app --reload --port 8000
+uvicorn main:app --reload --port 8000
 ```
 
-API docs (FastAPI):
-- http://localhost:8000/docs
+The server will start at `http://localhost:8000`
+
+**API Documentation:**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+### 4. Run Tests
+
+Run all tests:
+```bash
+python -m pytest tests.py -v
+```
+
+Run specific test:
+```bash
+python -m pytest tests.py::test_create_note -v
+```
+
+Run with coverage (optional):
+```bash
+python -m pytest tests.py -v --cov=. --cov-report=html
+```
 
 ---
 
-## Example curl commands
+## Working with the API
 
-### Create a note
+### Notes Management
+
+#### Create a note
 ```bash
 curl -X POST http://localhost:8000/notes \
   -H "Content-Type: application/json" \
   -d '{"title":"Buy milk","content":"2L","tags":["shopping"]}'
 ```
 
-### List notes
+#### List all notes
 ```bash
 curl http://localhost:8000/notes
 ```
 
-### Search notes
+#### Search notes by query
 ```bash
 curl "http://localhost:8000/notes?q=milk"
 ```
 
-### Filter by tag
+#### Filter notes by tag
 ```bash
 curl "http://localhost:8000/notes?tag=shopping"
 ```
 
-### Create note via webhook
+#### Get a specific note by ID
+```bash
+curl http://localhost:8000/notes/1
+```
+
+#### Update a note
+```bash
+curl -X PUT http://localhost:8000/notes/1 \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Buy 2L milk","content":"2L whole milk","tags":["shopping","urgent"]}'
+```
+
+#### Delete a note
+```bash
+curl -X DELETE http://localhost:8000/notes/1
+```
+
+### Webhooks
+
+#### Send a webhook event (create note via webhook)
 ```bash
 curl -X POST http://localhost:8000/webhooks/note \
   -H "Content-Type: application/json" \
   -d '{"source":"n8n","message":"Reminder: submit timesheet","tags":["admin"]}'
 ```
 
-### Webhook with token (if implemented)
+#### Get webhook event logs (last 20 payloads)
+```bash
+curl http://localhost:8000/webhooks/logs
+```
+
+#### Webhook with authentication (if WEBHOOK_TOKEN is set)
+
+Set the environment variable first:
+```bash
+# Windows
+set WEBHOOK_TOKEN=your-secret-token
+
+# Linux/macOS
+export WEBHOOK_TOKEN=your-secret-token
+```
+
+Then send authenticated webhook request:
 ```bash
 curl -X POST http://localhost:8000/webhooks/note \
   -H "Content-Type: application/json" \
-  -H "X-Webhook-Token: your-token" \
-  -d '{"source":"n8n","message":"Reminder: submit timesheet","tags":["admin"]}'
+  -H "X-Webhook-Token: your-secret-token" \
+  -d '{"source":"n8n","message":"Secure webhook event","tags":["secure"]}'
 ```
+
+---
+
+## Project Structure
+
+```
+mini_notes/
+├── main.py                 # FastAPI application 
+├── tests.py               # Pytest test cases
+├── requirements.txt       # Python dependencies
+├── database.db           # SQLite database (auto-created)
+├── README.md             # This file
+└── .venv/                # Virtual environment (created after setup)
+```
+
+---
+
+## Features Implemented
+
+**Core Features:**
+- Create, read, update, delete notes
+- Search and filter notes
+- Webhook endpoint for external integrations
+- Request/response validation with Pydantic
+- Comprehensive error handling
+
+**Bonus Features:**
+- SQLite database
+- Update note endpoint (`PUT /notes/{id}`)
+- Webhook authentication with `X-Webhook-Token` header
+- Webhook event logging (last 20 payloads in memory)
+- Webhook event log retrieval (`GET /webhooks/logs`)
+
+---
+
+## Troubleshooting
+
+### Virtual environment not activating
+Make sure you're in the project directory and use the correct activation command for your OS.
+
+### Module not found errors
+Ensure all dependencies are installed: `pip install -r requirements.txt`
+
+### Port 8000 already in use
+Use a different port: `uvicorn main:app --reload --port 8001`
+
+### Database issues
+Delete `database.db` to reset the database - it will be recreated automatically on next run.
+
+### Tests not running
+Ensure you're using pytest: `python -m pytest tests.py -v`
 
 ---
 
