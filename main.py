@@ -9,7 +9,7 @@ from typing import Annotated
 from collections import deque
 import os
 
-WEBHOOK_TOKEN = os.getenv("WEBHOOK_TOKEN", "your-secret-token")
+WEBHOOK_TOKEN = os.getenv("WEBHOOK_TOKEN", default="your-secret-token")
 
 # Global storage for webhook event logs (last 20 payloads)
 webhook_logs = deque(maxlen=20)
