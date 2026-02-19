@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pydantic
+sqlmodel
+sqlalchemy
+pytest
+httpx
