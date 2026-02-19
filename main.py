@@ -9,7 +9,7 @@ from typing import Annotated
 from collections import deque
 import os
 
-WEBHOOK_TOKEN = os.getenv("webhook_secret", "webhook_secret")
+WEBHOOK_TOKEN = os.getenv("WEBHOOK_TOKEN", "your-secret-token")
 
 # Global storage for webhook event logs (last 20 payloads)
 webhook_logs = deque(maxlen=20)
@@ -56,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/notes", response_model=Note, status_code=201)
 async def create_note(note: NoteRequest):
     note = Note(**note.model_dump())
-    
+
     with Session(engine) as session:
         session.add(note)
         session.commit()
