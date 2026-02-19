@@ -1,6 +1,7 @@
 import pytest
 from main import app, webhook_logs
 from fastapi.testclient import TestClient
+from main import WEBHOOK_TOKEN
 
 def test_create_note():
 
@@ -43,7 +44,14 @@ def test_webhook_note_creation():
             "message": "This is a webhook test note.",
             "tags": ["webhook", "test"]
         })
+        assert response.status_code == 401
 
+        response = client.post("/webhooks/note", headers={"X-Webhook-Token": f"{WEBHOOK_TOKEN}"}, json={
+            "source": "test_source",
+            "message": "This is a webhook test note.",
+            "tags": ["webhook", "test"]
+        })
+        
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -57,7 +65,7 @@ def test_webhook_logs():
     
         webhook_logs.clear()
 
-        client.post("/webhooks/note", json={
+        client.post("/webhooks/note", headers={"X-Webhook-Token": f"{WEBHOOK_TOKEN}"}, json={
             "source": "test_source",
             "message": "Log this event.",
             "tags": ["log"]
